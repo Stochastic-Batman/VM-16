@@ -1,5 +1,5 @@
 import createMemory from "./create-memory";
-import { MOV_LIT_R1, MOV_LIT_R2, ADD_REG_REG } from "./instructions";
+import { MOV_LIT_REG, MOV_REG_REG, MOV_REG_MEM, MOV_MEM_REG, ADD_REG_REG, JNE } from "./instructions";
 
 
 class CPU {
@@ -55,21 +55,42 @@ class CPU {
 
     execute(instr: number): void {
         switch (instr) {
-            case 0x10: {  // mov into r1
-                this.setRegister("r1", this.fetch16());
+            case MOV_LIT_REG: {
+                const literal = this.fetch16();
+                const reg = 2 * (this.fetch() % this.registerNames.length);
+                this.registers.setUint16(reg, literal);
                 return;
-            } case 0x11: {  // mov into r2
-                this.setRegister("r2", this.fetch16());
+            } case MOV_REG_REG: {
+                const from = 2 * (this.fetch() % this.registerNames.length);
+                const to = 2 * (this.fetch() % this.registerNames.length);
+                const value = this.registers.getUint16(from);
+                this.registers.setUint16(to, value);
                 return;
-            } case 0x12: {  // add registers
+            } case MOV_REG_MEM: {
+                const from = 2 * (this.fetch() % this.registerNames.length);
+                const address = this.fetch16();
+                const value = this.registers.getUint16(from);
+                this.memory.setUint16(address, value);
+                return;
+            } case MOV_MEM_REG: {
+                const address = this.fetch16();
+                const to = 2 * (this.fetch() % this.registerNames.length);
+                const value = this.memory.getUint16(address);
+                this.registers.setUint16(to, value);
+                return;
+            } case ADD_REG_REG: {
                 const r1 = this.fetch();
                 const r2 = this.fetch();
-                const res1 = this.registers.getUint16(r1 * 2);
-                const res2 = this.registers.getUint16(r2 * 2);
-                this.setRegister("acc", res1 + res2);
+                const v1 = this.registers.getUint16(r1 * 2); 
+                const v2 = this.registers.getUint16(r2 * 2); 
+                this.setRegister("acc", v1 + v2);
                 return;
-            }
-            default: {
+            } case JNE: {
+                const value = this.fetch16();
+                const address = this.fetch16();
+                if (value != this.getRegister("acc")) this.setRegister("pc", address);
+                return;
+            } default: {
                 throw new Error(`Unknown instruction: 0x${instr.toString(16)}`);
             }
         }
@@ -88,6 +109,11 @@ class CPU {
         console.log();
     }
 
+
+    viewMemoryAt(address: number): void {
+        const next8bytes = Array.from({length: 8}, (_, i) => this.memory.getUint8(address + i)).map(v => `0x${v.toString(16).padStart(2, '0')}`);
+        console.log(`0x${address.toString(16).padStart(4, '0')}: ${next8bytes.join(' ')}`);
+    }
 }
 
 

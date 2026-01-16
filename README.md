@@ -19,11 +19,10 @@ VM-16 is designed to simulate the core components of a computer system. It inclu
 The codebase is organized as follows:
 
 ```text
-.
-├── src
+├── src/
 │   ├── cpu.ts             # CPU logic and register management
 │   ├── create-memory.ts   # Memory allocation and access utilities
-│   ├── index.ts           # Application entry point
+│   ├── main.ts            # Application entry point
 │   └── instructions.ts    # Instruction set definitions and opcodes
 ├── package.json           # Dependencies and project scripts
 └── tsconfig.json          # TypeScript configuration
