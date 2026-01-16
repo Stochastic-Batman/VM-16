@@ -1,106 +1,128 @@
-import readline from "readline";
-import CPU from "./cpu";
-import createMemory from "./create-memory";
-import { 
-    MOV_LIT_REG, 
-    MOV_REG_MEM, 
-    PSH_LIT, 
-    CAL_LIT, 
-    RET 
+import {
+    MOV_LIT_REG, MOV_REG_REG, MOV_REG_MEM, MOV_MEM_REG,
+    ADD_REG_REG, JNE, PSH_LIT, PSH_REG, POP,
+    CAL_LIT, CAL_REG, RET, HLT
 } from "./instructions";
+import readline from "readline";
+import createMemory from "./create-memory";
+import CPU from "./cpu";
+import MemoryMapper from "./memory-mapper";
+import createScreenDevice from "./screen-device";
 
 
+const PC = 0;
+const ACC = 1;
 const R1 = 2;
+const R2 = 3;
+const R3 = 4;
 const R4 = 5;
+const R5 = 6;
+const R6 = 7;
+const R7 = 8;
 const R8 = 9;
+const SP = 10;
+const FP = 11;
+
+const MM = new MemoryMapper();
 
 const memory = createMemory(256 * 256);
-const wb = new Uint8Array(memory.buffer);
-const cpu = new CPU(memory);
+MM.map(memory, 0, 0xFFFF);
 
-const subroutineAddress = 0x3000;
+// Map 0xFF bytes of the address space to an "output device" - just stdout
+MM.map(createScreenDevice(), 0x3000, 0x30FF, true);
+
+const writableBytes = new Uint8Array(memory.buffer);
+
+const cpu = new CPU(MM);
 let i = 0;
 
+// Insert a subroutine for pausing/waiting at the address below
+const waitSubroutineAddress = 0x3100;
 
-// Push initial values to stack
-wb[i++] = PSH_LIT;
-wb[i++] = 0x33;
-wb[i++] = 0x33;
+const writeCharToScreen = (char: string, command: number, position: number) => {
+  writableBytes[i++] = MOV_LIT_REG;
+  writableBytes[i++] = command;
+  writableBytes[i++] = char.charCodeAt(0);
+  writableBytes[i++] = R1;
 
-wb[i++] = PSH_LIT;
-wb[i++] = 0x22;
-wb[i++] = 0x22;
+  writableBytes[i++] = MOV_REG_MEM;
+  writableBytes[i++] = R1;
+  writableBytes[i++] = 0x30;
+  writableBytes[i++] = position;
+};
 
-wb[i++] = PSH_LIT;
-wb[i++] = 0x11;
-wb[i++] = 0x11;
+/*
+ * Use JavaScript to generate the machine code for an animation
+ */
 
-// Setup registers
-wb[i++] = MOV_LIT_REG;
-wb[i++] = 0x12;
-wb[i++] = 0x34;
-wb[i++] = R1;
+let boldValue = 0;
 
-wb[i++] = MOV_LIT_REG;
-wb[i++] = 0x56;
-wb[i++] = 0x78;
-wb[i++] = R4;
+// Each iteration of the loop draws a different "frame" of animation
+for (let x = 3; x <= 15; x += 2) {
+  i = 0;
+  boldValue = boldValue === 0 ? 1 : 0;
 
-// Push argument count for the call (0 args)
-wb[i++] = PSH_LIT;
-wb[i++] = 0x00;
-wb[i++] = 0x00;
+  // Clear the screen
+  writeCharToScreen(" ", 0xFF, 0);
 
-// Call Subroutine at 0x3000
-wb[i++] = CAL_LIT;
-wb[i++] = (subroutineAddress & 0xff00) >> 8;
-wb[i++] = (subroutineAddress & 0x00ff);
+  for (let index = 0; index <= 0xFF; index++) {
+    const command = (index % 2 === boldValue)
+      ? 0x01  // In bold
+      : 0x02; // Regular
+    const char = (index % x === 0) ? " " : "+";
+    writeCharToScreen(char, command, index);
+  }
 
-// Instruction to execute after returning
-wb[i++] = PSH_LIT;
-wb[i++] = 0x44;
-wb[i++] = 0x44;
+  // No arguments for this functional call
+  writableBytes[i++] = PSH_LIT;
+  writableBytes[i++] = 0x00;
+  writableBytes[i++] = 0x00;
 
-// --- Subroutine Definition at 0x3000 ---
-i = subroutineAddress;
+  // Call the pause/wait function
+  writableBytes[i++] = CAL_LIT;
+  writableBytes[i++] = (waitSubroutineAddress & 0xFF00) >> 8;
+  writableBytes[i++] = (waitSubroutineAddress & 0x00FF);
+}
 
-wb[i++] = PSH_LIT;
-wb[i++] = 0x01;
-wb[i++] = 0x02;
+// Jump to the start of the code
+writableBytes[i++] = MOV_LIT_REG;
+writableBytes[i++] = 0x00;
+writableBytes[i++] = 0x00;
+writableBytes[i++] = PC;
 
-wb[i++] = PSH_LIT;
-wb[i++] = 0x03;
-wb[i++] = 0x04;
+//////////// Subroutine for pausing ///////////////
 
-wb[i++] = PSH_LIT;
-wb[i++] = 0x05;
-wb[i++] = 0x06;
+// start writing code at the subroutine address
+i = waitSubroutineAddress;
 
-wb[i++] = MOV_LIT_REG;
-wb[i++] = 0x07;
-wb[i++] = 0x08;
-wb[i++] = R1;
+// R1 is a constant 1, which we add to the accumulator
+writableBytes[i++] = MOV_LIT_REG;
+writableBytes[i++] = 0;
+writableBytes[i++] = 1;
+writableBytes[i++] = R1;
 
-wb[i++] = MOV_LIT_REG;
-wb[i++] = 0x09;
-wb[i++] = 0x0a;
-wb[i++] = R8;
+// Acc starts at zero
+writableBytes[i++] = MOV_LIT_REG;
+writableBytes[i++] = 0;
+writableBytes[i++] = 0;
+writableBytes[i++] = ACC;
 
-wb[i++] = RET;
+// loopStart is a label for the beginning of this loop
+const loopStart = i;
 
-// Initial state display
-cpu.debug();
-cpu.viewMemoryAt(cpu.getRegister('pc'));
-// View stack memory at the end of the address space
-cpu.viewMemoryAt(0xffff - 43, 44);
+// Add R1 (1) to the Acc
+writableBytes[i++] = ADD_REG_REG;
+writableBytes[i++] = R1;
+writableBytes[i++] = ACC;
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+// if (Acc != 0xccff) then jump to the start of the loop
+writableBytes[i++] = JNE;
+writableBytes[i++] = 0xCC;
+writableBytes[i++] = 0xFF;
+writableBytes[i++] = (loopStart & 0xFF00) >> 8;
+writableBytes[i++] = (loopStart & 0x00FF);
 
-console.log("Press ENTER to step...");
+// otherwise return from the function
+writableBytes[i++] = RET;
 
-rl.on('line', () => {
-    cpu.step();
-    cpu.debug();
-    cpu.viewMemoryAt(cpu.getRegister('pc'));
-    cpu.viewMemoryAt(0xffff - 43, 44);
-});
+cpu.run();

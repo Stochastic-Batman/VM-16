@@ -10,3 +10,4 @@ export const POP         = 0x1A;
 export const CAL_LIT     = 0x5E;
 export const CAL_REG     = 0x5F;
 export const RET         = 0x60;
+export const HLT         = 0xFF;

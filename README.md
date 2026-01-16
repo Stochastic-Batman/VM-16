@@ -22,8 +22,10 @@ The codebase is organized as follows:
 ├── src/
 │   ├── cpu.ts             # CPU logic and register management
 │   ├── create-memory.ts   # Memory allocation and access utilities
-│   ├── main.ts            # Application entry point
-│   └── instructions.ts    # Instruction set definitions and opcodes
+│   ├── instructions.ts    # Instruction set definitions and opcodes
+│   ├── main.ts            # Application entry point and animation logic
+│   ├── memory-mapper.ts   # Hardware abstraction layer for device mapping
+│   └── screen-device.ts   # Terminal-based display emulation logic
 ├── package.json           # Dependencies and project scripts
 └── tsconfig.json          # TypeScript configuration
 ```

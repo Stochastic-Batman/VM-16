@@ -2,7 +2,7 @@ import createMemory from "./create-memory";
 import { 
     MOV_LIT_REG, MOV_REG_REG, MOV_REG_MEM, MOV_MEM_REG, 
     ADD_REG_REG, JNE, PSH_LIT, PSH_REG, POP, 
-    CAL_LIT, CAL_REG, RET 
+    CAL_LIT, CAL_REG, RET, HLT
 } from "./instructions";
 
 
@@ -24,8 +24,8 @@ class CPU {
             return map;
         }, {});
 
-        this.setRegister("sp", memory.byteLength - 1 - 1);
-        this.setRegister("fp", memory.byteLength - 1 - 1);
+        this.setRegister("sp", 0xFFFF - 1);
+        this.setRegister("fp", 0xFFFF - 1);
         this.stackFrameSize = 0;
     }
 
@@ -67,7 +67,7 @@ class CPU {
     }
 
 
-    execute(instr: number): void {
+    execute(instr: number): void | boolean {
         switch (instr) {
             case MOV_LIT_REG: {
                 const literal = this.fetch16();
@@ -95,8 +95,8 @@ class CPU {
             } case ADD_REG_REG: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
-                const v1 = this.registers.getUint16(r1 * 2); 
-                const v2 = this.registers.getUint16(r2 * 2); 
+                const v1 = this.registers.getUint16(r1); 
+                const v2 = this.registers.getUint16(r2); 
                 this.setRegister("acc", v1 + v2);
                 return;
             } case JNE: {
@@ -130,6 +130,8 @@ class CPU {
             } case RET: {
                 this.popState();
                 return;
+            } case HLT: {
+                return true;
             } default: {
                 throw new Error(`Execute: Unknown instruction 0x${instr.toString(16)}`);
             }
@@ -137,7 +139,7 @@ class CPU {
     }
     
 
-    step(): void {
+    step(): void | boolean {
         return this.execute(this.fetch());
     }
 
@@ -209,6 +211,14 @@ class CPU {
     viewMemoryAt(address: number, n: number = 8): void {
         const nextNbytes = Array.from({length: n}, (_, i) => this.memory.getUint8(address + i)).map(v => `0x${v.toString(16).padStart(2, '0')}`);
         console.log(`0x${address.toString(16).padStart(4, '0')}: ${nextNbytes.join(' ')}`);
+    }
+
+
+    run() {
+        const halt = this.step();
+        if (!halt) {
+            setImmediate(() => this.run());
+        }
     }
 }
 
