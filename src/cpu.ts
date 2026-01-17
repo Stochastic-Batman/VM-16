@@ -1,7 +1,6 @@
 import createMemory from "./create-memory";
-import * as instructions from "./instructions";
+import instructions from "./instructions/index";
 import { Device } from "./memory-mapper";
-
 
 class CPU {
     private memory: Device;
@@ -112,44 +111,45 @@ class CPU {
 
     execute(instr: number): void | boolean {
         switch (instr) {
-            case instructions.MOV_IMM_REG: {
+            // Move Instructions
+            case instructions.MOV_IMM_REG.opcode: {
                 const imm = this.fetch16();
                 const reg = this.fetchRegIdx();
                 this.registers.setUint16(reg, imm);
                 return;
             }
-            case instructions.MOV_REG_REG: {
+            case instructions.MOV_REG_REG.opcode: {
                 const from = this.fetchRegIdx();
                 const to = this.fetchRegIdx();
                 this.registers.setUint16(to, this.registers.getUint16(from));
                 return;
             }
-            case instructions.MOV_REG_MEM: {
+            case instructions.MOV_REG_MEM.opcode: {
                 const from = this.fetchRegIdx();
                 const addr = this.fetch16();
                 this.memory.setUint16(addr, this.registers.getUint16(from));
                 return;
             }
-            case instructions.MOV_MEM_REG: {
+            case instructions.MOV_MEM_REG.opcode: {
                 const addr = this.fetch16();
                 const to = this.fetchRegIdx();
                 this.registers.setUint16(to, this.memory.getUint16(addr));
                 return;
             }
-            case instructions.MOV_IMM_MEM: {
+            case instructions.MOV_IMM_MEM.opcode: {
                 const val = this.fetch16();
                 const addr = this.fetch16();
                 this.memory.setUint16(addr, val);
                 return;
             }
-            case instructions.MOV_REG_PTR_REG: {
+            case instructions.MOV_REG_PTR_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 const ptr = this.registers.getUint16(r1);
                 this.registers.setUint16(r2, this.memory.getUint16(ptr));
                 return;
             }
-            case instructions.MOV_IMM_OFF_REG: {
+            case instructions.MOV_IMM_OFF_REG.opcode: {
                 const base = this.fetch16();
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
@@ -157,225 +157,233 @@ class CPU {
                 this.registers.setUint16(r2, this.memory.getUint16(base + offset));
                 return;
             }
-            case instructions.ADD_REG_REG: {
+
+            // Arithmetic Instructions
+            case instructions.ADD_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.setRegister("acc", this.registers.getUint16(r1) + this.registers.getUint16(r2));
                 return;
             }
-            case instructions.ADD_IMM_REG: {
+            case instructions.ADD_IMM_REG.opcode: {
                 const imm = this.fetch16();
                 const r1 = this.fetchRegIdx();
                 this.setRegister("acc", imm + this.registers.getUint16(r1));
                 return;
             }
-            case instructions.SUB_IMM_REG: {
+            case instructions.SUB_IMM_REG.opcode: {
                 const imm = this.fetch16();
                 const r1 = this.fetchRegIdx();
                 this.setRegister("acc", this.registers.getUint16(r1) - imm);
                 return;
             }
-            case instructions.SUB_REG_IMM: {
+            case instructions.SUB_REG_IMM.opcode: {
                 const r1 = this.fetchRegIdx();
                 const imm = this.fetch16();
                 this.setRegister("acc", imm - this.registers.getUint16(r1));
                 return;
             }
-            case instructions.SUB_REG_REG: {
+            case instructions.SUB_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.setRegister("acc", this.registers.getUint16(r1) - this.registers.getUint16(r2));
                 return;
             }
-            case instructions.MUL_IMM_REG: {
+            case instructions.MUL_IMM_REG.opcode: {
                 const imm = this.fetch16();
                 const r1 = this.fetchRegIdx();
                 this.setRegister("acc", imm * this.registers.getUint16(r1));
                 return;
             }
-            case instructions.MUL_REG_REG: {
+            case instructions.MUL_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.setRegister("acc", this.registers.getUint16(r1) * this.registers.getUint16(r2));
                 return;
             }
-            case instructions.INC_REG: {
+            case instructions.INC_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 this.registers.setUint16(r1, this.registers.getUint16(r1) + 1);
                 return;
             }
-            case instructions.DEC_REG: {
+            case instructions.DEC_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 this.registers.setUint16(r1, this.registers.getUint16(r1) - 1);
                 return;
             }
-            case instructions.LSF_REG_IMM: {
+
+            // Bitwise & Logic
+            case instructions.LSF_REG_IMM.opcode: {
                 const r1 = this.fetchRegIdx();
                 const imm = this.fetch();
                 this.registers.setUint16(r1, this.registers.getUint16(r1) << imm);
                 return;
             }
-            case instructions.LSF_REG_REG: {
+            case instructions.LSF_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.registers.setUint16(r1, this.registers.getUint16(r1) << this.registers.getUint16(r2));
                 return;
             }
-            case instructions.RSF_REG_IMM: {
+            case instructions.RSF_REG_IMM.opcode: {
                 const r1 = this.fetchRegIdx();
                 const imm = this.fetch();
                 this.registers.setUint16(r1, this.registers.getUint16(r1) >> imm);
                 return;
             }
-            case instructions.RSF_REG_REG: {
+            case instructions.RSF_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.registers.setUint16(r1, this.registers.getUint16(r1) >> this.registers.getUint16(r2));
                 return;
             }
-            case instructions.AND_REG_IMM: {
+            case instructions.AND_REG_IMM.opcode: {
                 const r1 = this.fetchRegIdx();
                 const imm = this.fetch16();
                 this.setRegister("acc", this.registers.getUint16(r1) & imm);
                 return;
             }
-            case instructions.AND_REG_REG: {
+            case instructions.AND_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.setRegister("acc", this.registers.getUint16(r1) & this.registers.getUint16(r2));
                 return;
             }
-            case instructions.OR_REG_IMM: {
+            case instructions.OR_REG_IMM.opcode: {
                 const r1 = this.fetchRegIdx();
                 const imm = this.fetch16();
                 this.setRegister("acc", this.registers.getUint16(r1) | imm);
                 return;
             }
-            case instructions.OR_REG_REG: {
+            case instructions.OR_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.setRegister("acc", this.registers.getUint16(r1) | this.registers.getUint16(r2));
                 return;
             }
-            case instructions.XOR_REG_IMM: {
+            case instructions.XOR_REG_IMM.opcode: {
                 const r1 = this.fetchRegIdx();
                 const imm = this.fetch16();
                 this.setRegister("acc", this.registers.getUint16(r1) ^ imm);
                 return;
             }
-            case instructions.XOR_REG_REG: {
+            case instructions.XOR_REG_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const r2 = this.fetchRegIdx();
                 this.setRegister("acc", this.registers.getUint16(r1) ^ this.registers.getUint16(r2));
                 return;
             }
-            case instructions.NOT: {
+            case instructions.NOT.opcode: {
                 const r1 = this.fetchRegIdx();
                 this.setRegister("acc", (~this.registers.getUint16(r1)) & 0xFFFF);
                 return;
             }
-            case instructions.JMP_NOT_EQ: {
+
+            // Jumps
+            case instructions.JMP_NOT_EQ.opcode: {
                 const imm = this.fetch16();
                 const addr = this.fetch16();
                 if (imm !== this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JNE_REG: {
+            case instructions.JNE_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const addr = this.fetch16();
                 if (this.registers.getUint16(r1) !== this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JEQ_IMM: {
+            case instructions.JEQ_IMM.opcode: {
                 const imm = this.fetch16();
                 const addr = this.fetch16();
                 if (imm === this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JEQ_REG: {
+            case instructions.JEQ_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const addr = this.fetch16();
                 if (this.registers.getUint16(r1) === this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JLT_IMM: {
+            case instructions.JLT_IMM.opcode: {
                 const imm = this.fetch16();
                 const addr = this.fetch16();
                 if (imm < this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JLT_REG: {
+            case instructions.JLT_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const addr = this.fetch16();
                 if (this.registers.getUint16(r1) < this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JGT_IMM: {
+            case instructions.JGT_IMM.opcode: {
                 const imm = this.fetch16();
                 const addr = this.fetch16();
                 if (imm > this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JGT_REG: {
+            case instructions.JGT_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const addr = this.fetch16();
                 if (this.registers.getUint16(r1) > this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JLE_IMM: {
+            case instructions.JLE_IMM.opcode: {
                 const imm = this.fetch16();
                 const addr = this.fetch16();
                 if (imm <= this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JLE_REG: {
+            case instructions.JLE_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const addr = this.fetch16();
                 if (this.registers.getUint16(r1) <= this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JGE_IMM: {
+            case instructions.JGE_IMM.opcode: {
                 const imm = this.fetch16();
                 const addr = this.fetch16();
                 if (imm >= this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.JGE_REG: {
+            case instructions.JGE_REG.opcode: {
                 const r1 = this.fetchRegIdx();
                 const addr = this.fetch16();
                 if (this.registers.getUint16(r1) >= this.getRegister("acc")) this.setRegister("pc", addr);
                 return;
             }
-            case instructions.PSH_IMM: {
+
+            // Stack & Control
+            case instructions.PSH_IMM.opcode: {
                 this.push(this.fetch16());
                 return;
             }
-            case instructions.PSH_REG: {
+            case instructions.PSH_REG.opcode: {
                 this.push(this.registers.getUint16(this.fetchRegIdx()));
                 return;
             }
-            case instructions.POP: {
+            case instructions.POP.opcode: {
                 const reg = this.fetchRegIdx();
                 this.registers.setUint16(reg, this.pop());
                 return;
             }
-            case instructions.CAL_IMM: {
+            case instructions.CAL_IMM.opcode: {
                 const addr = this.fetch16();
                 this.pushState();
                 this.setRegister("pc", addr);
                 return;
             }
-            case instructions.CAL_REG: {
+            case instructions.CAL_REG.opcode: {
                 const addr = this.registers.getUint16(this.fetchRegIdx());
                 this.pushState();
                 this.setRegister("pc", addr);
                 return;
             }
-            case instructions.RET: {
+            case instructions.RET.opcode: {
                 this.popState();
                 return;
             }
-            case instructions.HLT: {
+            case instructions.HLT.opcode: {
                 return true;
             }
         }

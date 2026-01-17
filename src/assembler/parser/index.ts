@@ -1,10 +1,10 @@
-import { inspect } from "util";
+import A from "arcsecond";
 import instructionsParser from "./instructions";
+import { label } from "./common";
 
-const deepLog = (x: any) => console.log(inspect(x, {
-    depth: Infinity,
-    colors: true
-}));
+const parser = A.many(A.choice([
+  instructionsParser,
+  label
+]));
 
-const res = instructionsParser.run("hlt");
-deepLog(res);
+export default parser;

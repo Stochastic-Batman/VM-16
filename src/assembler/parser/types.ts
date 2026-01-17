@@ -14,3 +14,4 @@ export const bracketedExpression = asType("BRACKETED_EXPRESSION");
 export const squareBracketExpression = asType("SQUARE_BRACKET_EXPRESSION");
 
 export const instruction = asType("INSTRUCTION");
+export const label = asType("LABEL");

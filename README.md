@@ -21,23 +21,26 @@ The codebase is organized as follows:
 
 ```text
 ├── src/
-│   ├── assembler/             # Tools for converting assembly to bytecode
-│   │   └── parser/            # Arcsecond-based recursive descent parser
-│   │       ├── common.ts      # Shared parsers (registers, hex, addresses)
-│   │       ├── expressions.ts # Math and bracketed expression logic
-│   │       ├── formats.ts     # Instruction argument pattern matching
-│   │       ├── index.ts       # Parser entry point and test runner
-│   │       ├── instructions.ts# Complete instruction set parser
-│   │       ├── types.ts       # AST node type definitions
-│   │       └── util.ts        # Parsing utility functions
-│   ├── cpu.ts                 # CPU logic and register management (using "pc")
-│   ├── create-memory.ts       # Memory allocation and access utilities
-│   ├── instructions.ts        # ISA definitions and IMM opcodes
-│   ├── main.ts                # Application entry point and animation logic
-│   ├── memory-mapper.ts       # Hardware abstraction layer for device mapping
-│   └── screen-device.ts       # Terminal-based display emulation logic
-├── package.json               # Dependencies and project scripts
-└── tsconfig.json              # TypeScript configuration
+│   ├── assembler/              # Tools for converting assembly to bytecode
+│   │   ├── parser/             # Arcsecond-based recursive descent parser
+│   │   │   ├── common.ts       # Shared parsers (registers, hex, addresses)
+│   │   │   ├── expressions.ts  # Math and bracketed expression logic
+│   │   │   ├── formats.ts      # Instruction argument pattern matching
+│   │   │   ├── index.ts        # Parser entry point and test runner
+│   │   │   ├── instructions.ts # Complete instruction set parser
+│   │   │   ├── types.ts        # AST node type definitions
+│   │   │   └── util.ts         # Parsing utility functions
+│   │   └── index.ts            # Assembler entry point
+│   ├── instructions/           # ISA definitions and Opcode mapping
+│   │   ├── index.ts            # Indexed instruction lookup (instruction name to meta)
+│   │   └── meta.ts             # Instruction metadata, types, and opcode values
+│   ├── cpu.ts                  # CPU logic and register management (using "pc")
+│   ├── create-memory.ts        # Memory allocation and access utilities
+│   ├── main.ts                 # Application entry point and animation logic
+│   ├── memory-mapper.ts        # Hardware abstraction layer for device mapping
+│   └── screen-device.ts        # Terminal-based display emulation logic
+├── package.json                # Dependencies and project scripts
+└── tsconfig.json               # TypeScript configuration
 ```
 
 ## Technical Specifications

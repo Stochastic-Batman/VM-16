@@ -24,22 +24,14 @@ export const register = A.choice([
 ]).map(T.register);
 
 export const hexDigit = A.regex(/^[0-9A-Fa-f]/);
-export const hexImmediate = A.char("$")
-    .chain(() => mapJoin(A.many1(hexDigit)))
-    .map(T.hexImmediate);
+export const hexImmediate = A.char("$").chain(() => mapJoin(A.many1(hexDigit))).map(T.hexImmediate);
+export const address = A.char("&").chain(() => mapJoin(A.many1(hexDigit))).map(T.address);
 
-export const address = A.char("&")
-    .chain(() => mapJoin(A.many1(hexDigit)))
-    .map(T.address);
+export const validIdentifier = mapJoin(A.sequenceOf([A.regex(/^[a-zA-Z_]/), A.possibly(A.regex(/^[a-zA-Z0-9_]+/)).map((x: any) => x === null ? "" : x)]));
 
-export const validIdentifier = mapJoin(A.sequenceOf([
-    A.regex(/^[a-zA-Z_]/),
-    A.possibly(A.regex(/^[a-zA-Z0-9_]+/)).map((x: any) => x === null ? "" : x)
-]));
+export const variable = A.char("!").chain(() => validIdentifier).map(T.variable);
 
-export const variable = A.char("!")
-    .chain(() => validIdentifier)
-    .map(T.variable);
+export const label = A.sequenceOf([validIdentifier, A.char(':'), A.optionalWhitespace]).map(([labelName]) => labelName).map(T.label);
 
 export const operator = A.choice([
     A.char("+").map(T.opPlus),
