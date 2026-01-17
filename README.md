@@ -21,12 +21,18 @@ The codebase is organized as follows:
 
 ```text
 ├── src/
-│   ├── assembler/
-│   │   └── parser/
-│   │       └── index.ts       # Arcsecond-based parser for assembly instructions
-│   ├── cpu.ts                 # CPU logic and register management (keeps "pc")
+│   ├── assembler/             # Tools for converting assembly to bytecode
+│   │   └── parser/            # Arcsecond-based recursive descent parser
+│   │       ├── common.ts      # Shared parsers (registers, hex, addresses)
+│   │       ├── expressions.ts # Math and bracketed expression logic
+│   │       ├── formats.ts     # Instruction argument pattern matching
+│   │       ├── index.ts       # Parser entry point and test runner
+│   │       ├── instructions.ts# Complete instruction set parser
+│   │       ├── types.ts       # AST node type definitions
+│   │       └── util.ts        # Parsing utility functions
+│   ├── cpu.ts                 # CPU logic and register management (using "pc")
 │   ├── create-memory.ts       # Memory allocation and access utilities
-│   ├── instructions.ts        # Instruction set definitions (LIT updated to IMM)
+│   ├── instructions.ts        # ISA definitions and IMM opcodes
 │   ├── main.ts                # Application entry point and animation logic
 │   ├── memory-mapper.ts       # Hardware abstraction layer for device mapping
 │   └── screen-device.ts       # Terminal-based display emulation logic

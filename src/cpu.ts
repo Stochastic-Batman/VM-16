@@ -2,6 +2,7 @@ import createMemory from "./create-memory";
 import * as instructions from "./instructions";
 import { Device } from "./memory-mapper";
 
+
 class CPU {
     private memory: Device;
     private registerNames: string[];
@@ -384,6 +385,11 @@ class CPU {
         return this.execute(this.fetch());
     }
 
+    run(): void {
+        const halt = this.step();
+        if (!halt) setImmediate(() => this.run());
+    }
+
     debug(): void {
         this.registerNames.forEach(name => {
             console.log(`${name}: 0x${this.getRegister(name).toString(16).padStart(4, "0")}`);
@@ -394,13 +400,6 @@ class CPU {
     viewMemoryAt(address: number, n: number = 8): void {
         const nextNbytes = Array.from({ length: n }, (_, i) => this.memory.getUint8(address + i)).map(v => `0x${v.toString(16).padStart(2, "0")}`);
         console.log(`0x${address.toString(16).padStart(4, "0")}: ${nextNbytes.join(" ")}`);
-    }
-
-    run(): void {
-        const halt = this.step();
-        if (!halt) {
-            setImmediate(() => this.run());
-        }
     }
 }
 
