@@ -12,6 +12,7 @@ VM-16 is designed to simulate the core components of a computer system. It inclu
 * **CPU**: Handles the fetch-decode-execute cycle and manages internal registers.
 * **Memory**: A dedicated data store providing the VM with its primary workspace.
 * **Instructions**: A defined set of opcodes that dictate the behavior of the system.
+* **Assembler**: A parser built with `arcsecond` to convert assembly mnemonics into bytecode.
 
 
 ## Project Structure
@@ -20,14 +21,17 @@ The codebase is organized as follows:
 
 ```text
 ├── src/
-│   ├── cpu.ts             # CPU logic and register management
-│   ├── create-memory.ts   # Memory allocation and access utilities
-│   ├── instructions.ts    # Instruction set definitions and opcodes
-│   ├── main.ts            # Application entry point and animation logic
-│   ├── memory-mapper.ts   # Hardware abstraction layer for device mapping
-│   └── screen-device.ts   # Terminal-based display emulation logic
-├── package.json           # Dependencies and project scripts
-└── tsconfig.json          # TypeScript configuration
+│   ├── assembler/
+│   │   └── parser/
+│   │       └── index.ts       # Arcsecond-based parser for assembly instructions
+│   ├── cpu.ts                 # CPU logic and register management (keeps "pc")
+│   ├── create-memory.ts       # Memory allocation and access utilities
+│   ├── instructions.ts        # Instruction set definitions (LIT updated to IMM)
+│   ├── main.ts                # Application entry point and animation logic
+│   ├── memory-mapper.ts       # Hardware abstraction layer for device mapping
+│   └── screen-device.ts       # Terminal-based display emulation logic
+├── package.json               # Dependencies and project scripts
+└── tsconfig.json              # TypeScript configuration
 ```
 
 ## Technical Specifications

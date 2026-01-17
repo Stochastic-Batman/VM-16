@@ -13,12 +13,14 @@
     "virtual-machine",
     "16-bit",
     "emulator",
+    "assembler",
     "typescript"
   ],
   "author": "Stochastic-Batman",
   "license": "GPL-3.0",
   "devDependencies": {
     "typescript": "^5.0.0",
-    "tsx": "^4.0.0"
+    "tsx": "^4.0.0",
+    "arcsecond": "^4.1.0"
   }
 }
