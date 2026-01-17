@@ -1,6 +1,8 @@
 import createMemory from "./create-memory";
 import instructions from "./instructions/index";
 import { Device } from "./memory-mapper";
+import { registers } from './registers';
+
 
 class CPU {
     private memory: Device;
@@ -11,14 +13,11 @@ class CPU {
 
     constructor(memory: Device) {
         this.memory = memory;
-        this.registerNames = ["pc", "acc", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "sp", "fp"];
-        this.registers = createMemory(this.registerNames.length * 2);
-
-        this.registerMap = this.registerNames.reduce((map: { [key: string]: number }, name, i) => {
+        this.registers = createMemory(2 * registers.length);
+        this.registerMap = registers.reduce((map: { [key: string]: number }, name, i) => {
             map[name] = i * 2;
             return map;
         }, {});
-
         this.setRegister("sp", 0xFFFF - 1);
         this.setRegister("fp", 0xFFFF - 1);
         this.stackFrameSize = 0;
@@ -53,7 +52,7 @@ class CPU {
     }
 
     fetchRegIdx(): number {
-        return (this.fetch() % this.registerNames.length) * 2;
+        return (this.fetch() % registers.length) * 2;
     }
 
     push(value: number): void {
@@ -399,7 +398,7 @@ class CPU {
     }
 
     debug(): void {
-        this.registerNames.forEach(name => {
+        registers.forEach(name => {
             console.log(`${name}: 0x${this.getRegister(name).toString(16).padStart(4, "0")}`);
         });
         console.log();

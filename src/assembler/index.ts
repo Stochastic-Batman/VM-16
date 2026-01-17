@@ -1,21 +1,14 @@
 import parser from "./parser/index";
 import instructions from "../instructions/index";
 import { InstructionType as I } from "../instructions/meta";
+import { registers } from './registers';
 
-const registerMap: Record<string, number> = {
-  pc: 0,
-  acc: 1,
-  r1: 2,
-  r2: 3,
-  r3: 4,
-  r4: 5,
-  r5: 6,
-  r6: 7,
-  r7: 8,
-  r8: 9,
-  sp: 10,
-  fp: 11,
-};
+
+
+const registerMap: Record<string, number> = registers.reduce((map: Record<string, number>, regName: string, idx: number) => {
+    map[regName] = idx;
+    return map;
+}, {} as Record<string, number>);
 
 const encodeLitOrMem = (lit: any, labels: Record<string, number>, machineCode: number[]) => {
   let hexVal: number;
