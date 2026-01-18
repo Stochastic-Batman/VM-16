@@ -23,9 +23,9 @@ class CPU {
         this.interuptVectorAddress = interuptVectorAddress;
         this.isInInteruptHandler = false;
 
-        this.setRegister("im", 0xffff);
-        this.setRegister("sp", 0xffff - 1);
-        this.setRegister("fp", 0xffff - 1);
+        this.setRegister("im", 0xFFFF);
+        this.setRegister("sp", 0xFFFF - 2);
+        this.setRegister("fp", 0xFFFf - 2);
 
         this.stackFrameSize = 0;
     }

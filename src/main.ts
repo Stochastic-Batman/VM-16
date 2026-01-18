@@ -36,16 +36,16 @@ const createBankedMemory = (n: number, bankSize: number, cpu: CPU): Device => {
 const MM = new MemoryMapper();
 const cpu = new CPU(MM);
 
-const bankSize = 0xFF;
+const bankSize = 0x101;
 const nBanks = 8;
 
 // Map the banked memory to the start of the address space (0x0000 - 0x00FF)
 const memoryBankDevice = createBankedMemory(nBanks, bankSize, cpu);
-MM.map(memoryBankDevice, 0, bankSize);
+MM.map(memoryBankDevice, 0x0000, 0x00FF);
 
-// Map regular RAM from 0x00FF to 0xFFFF
+// Map regular RAM from 0x0100 to 0xFFFF
 const regularMemory = createMemory(0xFF01);
-MM.map(regularMemory, bankSize, 0xFFFF, true);
+MM.map(regularMemory, 0x0100, 0xFFFF, true);
 
 // Set up Interrupt Vector Table (IVT) starting at 0x1000
 // Index 0: Points to 0x2000
@@ -82,15 +82,22 @@ loadProgram(MM, 0x0000, [
     0x1A, 0x02,             // POP r1               
     0x17, 0x00, 0x06,       // PSH 6                
     0x17, 0x00, 0x07,       // PSH 7
+    0xFF                    // HLT
 ]);
+
 
 // Execution Loop
 while (true) {
-    console.clear(); // Clear before debug for better visibility
-    cpu.step();
+    console.clear();
+    const halt = cpu.step();
     cpu.debug();
     
     // View stack area (near the end of memory)
     cpu.viewMemoryAt(0xFFFF - 31, 16);
     cpu.viewMemoryAt(0xFFFF - 15, 16);
+    
+    if (halt) {
+        console.log("Program halted");
+        break;
+    }
 }
