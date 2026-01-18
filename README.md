@@ -38,7 +38,8 @@ The codebase is organized as follows:
 │   ├── create-memory.ts        # Memory allocation and access utilities
 │   ├── main.ts                 # Application entry point and animation logic
 │   ├── memory-mapper.ts        # Hardware abstraction layer for device mapping
-│   └── screen-device.ts        # Terminal-based display emulation logic
+│   ├── screen-device.ts        # Terminal-based display emulation logic
+│   └── registers.ts            # List of registers for the VM
 ├── package.json                # Dependencies and project scripts
 └── tsconfig.json               # TypeScript configuration
 ```

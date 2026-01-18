@@ -1,7 +1,7 @@
 import { asType } from "./util";
 
 export const register = asType("REGISTER");
-export const hexImmediate = asType("HEX_IMM");
+export const hexLiteral = asType("HEX_LITERAL");
 export const address = asType("ADDRESS");
 export const variable = asType("VARIABLE");
 
@@ -15,3 +15,7 @@ export const squareBracketExpression = asType("SQUARE_BRACKET_EXPRESSION");
 
 export const instruction = asType("INSTRUCTION");
 export const label = asType("LABEL");
+export const data = asType("DATA");
+export const structure = asType("STRUCTURE");
+export const constant = asType("CONSTANT");
+export const interpretAs = asType("INTERPRET_AS");
